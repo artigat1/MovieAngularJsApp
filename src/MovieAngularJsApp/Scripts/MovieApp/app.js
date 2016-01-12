@@ -11,19 +11,19 @@
     function config($routeProvider, $locationProvider) {
         $routeProvider
             .when('/', {
-                templateUrl: '/Views/list.html',
+                templateUrl: '/Views/MovieApp/list.html',
                 controller: 'MoviesListController'
             })
             .when('/movies/add', {
-                templateUrl: '/Views/add.html',
+                templateUrl: '/Views/MovieApp/add.html',
                 controller: 'MoviesAddController'
             })
             .when('/movies/edit/:id', {
-                templateUrl: '/Views/edit.html',
+                templateUrl: '/Views/MovieApp/edit.html',
                 controller: 'MoviesEditController'
             })
             .when('/movies/delete/:id', {
-                templateUrl: '/Views/delete.html',
+                templateUrl: '/Views/MovieApp/delete.html',
                 controller: 'MoviesDeleteController'
             });
 

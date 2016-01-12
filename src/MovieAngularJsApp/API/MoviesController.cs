@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using MovieAngularJsApp.Models;
 
@@ -12,40 +10,72 @@ namespace MovieAngularJsApp.API
     [Route("api/[controller]")]
     public class MoviesController : Controller
     {
+        private readonly MoviesAppContext _dbContext;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoviesController"/> class.
+        /// </summary>
+        /// <param name="dbContext">The database context.</param>
+        public MoviesController(MoviesAppContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         // GET: api/values
         [HttpGet]
         public IEnumerable<Movie> Get()
         {
-            return new List<Movie> {
-                new Movie {Id=1, Title="Star Wars", Director="Lucas"},
-                new Movie {Id=2, Title="King Kong", Director="Jackson"},
-                new Movie {Id=3, Title="Memento", Director="Nolan"}
-            };
+            return _dbContext.Movies;
         }
 
         // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{id:int}")]
+        public IActionResult Get(int id)
         {
-            return "value";
+            var movie = _dbContext.Movies.FirstOrDefault(m => m.Id == id);
+            if(movie == null)
+            {
+                return new HttpNotFoundResult();
+            }
+
+            return new ObjectResult(movie);
         }
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+        public IActionResult Post([FromBody]Movie movie)
         {
-        }
+            if (ModelState.IsValid)
+            {
+                if (movie.Id == 0)
+                {
+                    _dbContext.Movies.Add(movie);
+                    _dbContext.SaveChanges();
+                    return new ObjectResult(movie);
+                }
+                else
+                {
+                    var original = _dbContext.Movies.FirstOrDefault(m => m.Id == movie.Id);
+                    original.Title = movie.Title;
+                    original.Director = movie.Director;
+                    original.TicketPrice = movie.TicketPrice;
+                    original.ReleaseDate = movie.ReleaseDate;
+                    _dbContext.SaveChanges();
+                    return new ObjectResult(original);
+                }
+            }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
+            return new BadRequestObjectResult(ModelState);
         }
 
         // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete(int id)
         {
+            var movie = _dbContext.Movies.FirstOrDefault(m => m.Id == id);
+            _dbContext.Movies.Remove(movie);
+            _dbContext.SaveChanges();
+            return new HttpStatusCodeResult(200);
         }
     }
 }
