@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using MovieAngularJsApp.Models;
 
@@ -45,6 +46,11 @@ namespace MovieAngularJsApp.API
         [HttpPost]
         public IActionResult Post([FromBody]Movie movie)
         {
+            if (!HttpContext.User.HasClaim("CanEdit", "true"))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (ModelState.IsValid)
             {
                 if (movie.Id == 0)
@@ -72,6 +78,11 @@ namespace MovieAngularJsApp.API
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
+            if (!HttpContext.User.HasClaim("CanEdit", "true"))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             var movie = _dbContext.Movies.FirstOrDefault(m => m.Id == id);
             _dbContext.Movies.Remove(movie);
             _dbContext.SaveChanges();
